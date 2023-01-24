@@ -4,6 +4,7 @@
 
 // prototypes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow* window);
 
 int main()
 {
@@ -39,7 +40,8 @@ int main()
 
     // Render loop, that keeps on running until we tell GLFW to stop.
     while (!glfwWindowShouldClose(window))
-    {
+    {   
+        processInput(window);
         glfwSwapBuffers(window);
         /*The glfwSwapBuffers will swap the color buffer
         (a large 2D buffer that contains color values for each pixel in GLFW's window) 
@@ -56,4 +58,11 @@ int main()
 // Whenever the window changes in size, GLFW calls this function and fills in the proper arguments for viewport adjustment
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+}
+
+// Function that closes open GLFW window when ESC key is pressed
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }

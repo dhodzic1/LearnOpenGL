@@ -39,13 +39,20 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Render loop, that keeps on running until we tell GLFW to stop.
+    /*The glfwSwapBuffers will swap the color buffer
+    (a large 2D buffer that contains color values for each pixel in GLFW's window)
+    that is used to render to during this render iteration and show it as output to the screen.*/
     while (!glfwWindowShouldClose(window))
     {   
+        // input
         processInput(window);
+
+        // rendering commands here ...
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Specify color to clear screen with
+        glClear(GL_COLOR_BUFFER_BIT); // clear the color buffer
+
+        // check and call events and swap the buffers
         glfwSwapBuffers(window);
-        /*The glfwSwapBuffers will swap the color buffer
-        (a large 2D buffer that contains color values for each pixel in GLFW's window) 
-        that is used to render to during this render iteration and show it as output to the screen.*/
         glfwPollEvents(); // Check if any events are triggered such as key input or mouse movement, etc.s
     }
 

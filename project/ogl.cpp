@@ -61,19 +61,6 @@ int main()
          0.0f,  0.5f, 0.0f
     };
 
-    // Generate vertex buffer object to send vertex coordinates to GPU
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    // Bind VBO (Only a single buffer, in this case the VBO, can be defined for each buffer type)
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // vertex buffer object is of type GL_ARRAY_BUFFER in OpenGL
-    // Copy previously defined vertex data into the bound buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    /*
-    * GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
-    * GL_STATIC_DRAW: the data is set only once and used many times.
-    * GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
-    */
-
     // Create a vertex shader object
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -107,6 +94,43 @@ int main()
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
+    // Create Shader program
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+
+    // Attach previously defined vertex and fragment shaders to shader program object
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    // Link the attached shaders via glLinkProgram 
+    glLinkProgram(shaderProgram);
+
+    // error checking for shader program linking
+    int success;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) 
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    // Generate vertex array object
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    // Bind Vertex Array Object
+    glBindVertexArray(VAO);
+
+    // Generate vertex buffer object to send vertex coordinates to GPU
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    // Bind VBO (Only a single buffer, in this case the VBO, can be defined for each buffer type)
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); // vertex buffer object is of type GL_ARRAY_BUFFER in OpenGL
+    // Copy previously defined vertex data into the bound buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Set vertex attribute pointers
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+  
+
     // Render loop, that keeps on running until we tell GLFW to stop.
     /*The glfwSwapBuffers will swap the color buffer
     (a large 2D buffer that contains color values for each pixel in GLFW's window)
@@ -119,6 +143,15 @@ int main()
         // rendering commands here ...
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Specify color to clear screen with
         glClear(GL_COLOR_BUFFER_BIT); // clear the color buffer
+
+         // Activate shader program
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the triangle
+
+        // Delete defined shaders since they've been linked into shader program
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
 
         // check and call events and swap the buffers
         glfwSwapBuffers(window);

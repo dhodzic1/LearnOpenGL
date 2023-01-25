@@ -132,6 +132,9 @@
     <ClCompile Include="..\glad.c" />
     <ClCompile Include="..\ogl.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="notes.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

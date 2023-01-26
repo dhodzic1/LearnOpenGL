@@ -69,10 +69,13 @@ int main()
     //};
 
     // 2D triangle vertex coordinates
-    float vertices[] = {
+    float triangleOne[] = {
         -0.5f, -0.5f, 0.0f,
          0.0f, -0.5f, 0.0f,
-         0.0f,  0.0f, 0.0f,
+         0.0f,  0.0f, 0.0f
+    };
+
+    float triangleTwo[] = {
          0.0f, 0.0f, 0.0f,
          0.0f, -0.5f, 0.0f,
          0.5, -0.5f, 0.0f
@@ -127,21 +130,33 @@ int main()
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
-    // Generate vertex array object
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    // Bind Vertex Array Object
-    glBindVertexArray(VAO);
 
-    // Generate vertex buffer object to send vertex coordinates to GPU
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
+    // Delete defined shaders since they've been linked into shader program
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    unsigned int VAOs[2], VBOs[2];
+    // Generate vertex array objects and vertex buffer objects
+    glGenVertexArrays(2, VAOs);
+    glGenBuffers(2, VBOs);
+    
+    // Do VAO and VBO binding and load data into buffer for triangle one
+    // Bind Vertex Array Object (Do this before VBO always)
+    glBindVertexArray(VAOs[0]);
     // Bind VBO (Only a single buffer, in this case the VBO, can be defined for each buffer type)
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // vertex buffer object is of type GL_ARRAY_BUFFER in OpenGL
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // vertex buffer object is of type GL_ARRAY_BUFFER in OpenGL
     // Copy previously defined vertex data into the bound buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleOne), triangleOne, GL_STATIC_DRAW);
     // Set vertex attribute pointers
+    // 0 is attribute location, 3 is how many numbers (floats in this case), GL_FLOAT is type, 3 * sizeof... is STRIDE in buffer,
+    // (void*)0 is starting point
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Do VAO and VBO binding and load data into buffer triangle two
+    glBindVertexArray(VAOs[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleTwo), triangleTwo, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -167,9 +182,12 @@ int main()
 
          // Activate shader program
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6); // Draw the triangle
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // WIREFRAME
+        glBindVertexArray(VAOs[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the triangle
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // WIREFRAME, COMMENT FOR FILL
+
+        glBindVertexArray(VAOs[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         
         // Draw rectangle
         //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -177,14 +195,15 @@ int main()
         //// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // WIREFRAME
         //glBindVertexArray(0);
 
-        // Delete defined shaders since they've been linked into shader program
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
         // check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents(); // Check if any events are triggered such as key input or mouse movement, etc.s
     }
+
+    // Deallocate all resources once they're done with
+    glDeleteVertexArrays(2, VAOs);
+    glDeleteBuffers(2, VBOs);
+    glDeleteProgram(shaderProgram);
 
     // Delete all of GLFW's resources that were allocated and terminate
     glfwTerminate();

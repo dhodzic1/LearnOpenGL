@@ -54,11 +54,28 @@ int main()
     For retina displays width and height will end up significantly higher than the original input values.*/
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    //// rectangle vertices
+    //float vertices[] = {
+    // 0.5f,  0.5f, 0.0f,  // top right
+    // 0.5f, -0.5f, 0.0f,  // bottom right
+    //-0.5f, -0.5f, 0.0f,  // bottom left
+    //-0.5f,  0.5f, 0.0f   // top left 
+    //};
+
+    //// indices to be used for element buffer object (EBO)
+    //unsigned int indices[] = {  // note that we start from 0!
+    //    0, 1, 3,   // first triangle
+    //    1, 2, 3    // second triangle
+    //};
+
     // 2D triangle vertex coordinates
     float vertices[] = {
         -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+         0.0f, -0.5f, 0.0f,
+         0.0f,  0.0f, 0.0f,
+         0.0f, 0.0f, 0.0f,
+         0.0f, -0.5f, 0.0f,
+         0.5, -0.5f, 0.0f
     };
 
     // Create a vertex shader object
@@ -78,17 +95,16 @@ int main()
     glCompileShader(fragmentShader);
 
     // error checking for compilation of vertex shader and fragment shader
-    int successV;
-    int successF;
+    int success;
     char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &successV);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &successF);
-    if (!successV)
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
-    if (!successF)
+    if (!success)
     {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
@@ -105,7 +121,6 @@ int main()
     glLinkProgram(shaderProgram);
 
     // error checking for shader program linking
-    int success;
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) 
     {
@@ -129,6 +144,12 @@ int main()
     // Set vertex attribute pointers
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    // Generate element buffer object and bind it
+    /*unsigned int EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
   
 
     // Render loop, that keeps on running until we tell GLFW to stop.
@@ -147,7 +168,14 @@ int main()
          // Activate shader program
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the triangle
+        glDrawArrays(GL_TRIANGLES, 0, 6); // Draw the triangle
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // WIREFRAME
+        
+        // Draw rectangle
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // WIREFRAME
+        //glBindVertexArray(0);
 
         // Delete defined shaders since they've been linked into shader program
         glDeleteShader(vertexShader);

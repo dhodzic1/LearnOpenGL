@@ -39,8 +39,9 @@ int main()
     For retina displays width and height will end up significantly higher than the original input values.*/
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    Shader ourShader("C:/hLib/glProject/LearnOpenGL/project/Shaders/shader.vs", "C:/hLib/glProject/LearnOpenGL/project/Shaders/shader.fs");
-
+    // Load in shaders (linking, attaching, and program creation in shader_s.h Shader class file
+    Shader ourShader("C:/hLib/glProject/LearnOpenGL/project/shader.vs", "C:/hLib/glProject/LearnOpenGL/project/shader.fs");
+ 
     // 2D triangle vertex coordinates
     float triangle[] = {
         // positions         // colors
@@ -88,8 +89,9 @@ int main()
         // rendering commands here ...
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Specify color to clear screen with
         glClear(GL_COLOR_BUFFER_BIT); // clear the color buffer
-        
+
         ourShader.use();
+        ourShader.setFloat("posUniform", 0.5f);
         // Now render the triangle
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the triangle

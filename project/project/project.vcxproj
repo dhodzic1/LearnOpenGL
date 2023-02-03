@@ -136,6 +136,7 @@
     <Text Include="notes.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\Users\daria\Downloads\stb_image.h" />
     <ClInclude Include="..\..\..\..\Include\shader_s.h" />
   </ItemGroup>
   <ItemGroup>

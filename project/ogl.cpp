@@ -2,13 +2,15 @@
 #include <C:\glfw-3.3.8\include\GLFW\glfw3.h>
 #include <iostream>
 #include <C:\hLib\Include/shader_s.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 // prototypes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 int main()
-{
+{   
     // Instantiate GLFW (Graphics Library Framework) window
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -42,39 +44,111 @@ int main()
     // Load in shaders (linking, attaching, and program creation in shader_s.h Shader class file
     Shader ourShader("C:/hLib/glProject/LearnOpenGL/project/shader.vs", "C:/hLib/glProject/LearnOpenGL/project/shader.fs");
  
-    // 2D triangle vertex coordinates
-    float triangle[] = {
-        // positions         // colors
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+    //// 2D triangle vertex coordinates
+    //float triangle[] = {
+    //    // positions         // colors          // texture
+    //     0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f  // lower-left corner  
+    //    -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // lower-right corner
+    //     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.5f, 1.0f  // top-center corner
+    //};
+
+    float vertices[] = {
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
     };
 
-    unsigned int VAOs[2], VBOs[2];  // for single do unsigned int VAO, VBO and reference in genVertexArrays and genBuffers as &VAO or &VBO
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    unsigned int VAO, VBO, EBO;  // for single do unsigned int VAO, VBO and reference in genVertexArrays and genBuffers as &VAO or &VBO
     // Generate vertex array objects and vertex buffer objects
-    glGenVertexArrays(1, VAOs);
-    glGenBuffers(1, VBOs);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
     
     // Do VAO and VBO binding and load data into buffer for triangle one
     // Bind Vertex Array Object (Do this before VBO always)
-    glBindVertexArray(VAOs[0]);
+    glBindVertexArray(VAO);
     // Bind VBO (Only a single buffer, in this case the VBO, can be defined for each buffer type)
-    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // vertex buffer object is of type GL_ARRAY_BUFFER in OpenGL
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); // vertex buffer object is of type GL_ARRAY_BUFFER in OpenGL
     // Copy previously defined vertex data into the bound buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Set vertex attribute pointers
-    // 0 is attribute location, 3 is how many numbers (floats in this case), GL_FLOAT is type, 3 * sizeof... is STRIDE in buffer,
-    // (void*)0 is starting point
+    // 0 is attribute location, 3 is how many numbers (floats in this case), GL_FLOAT is type, 8 * sizeof... is STRIDE in buffer
+    // where the STRIDE includes the whole vertex attribute such as XYZRGBST in this case where each value is 4 bytes,
+    // (void*)0 is starting point, 3* sizeof(float) is 3 * 4 which is 12 as the offset from the beginning of vertex attribute array
+    // 6 * sizeof (float) is 6 * 4 which is 24 as the offset from beginning of vertex attribute array
  
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);   // NOTE sizeOf(float) is 4 BYTES
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);   // NOTE sizeOf(float) is 4 BYTES
     glEnableVertexAttribArray(0);
 
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    
+    // texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
+    // Generate first texture
+    unsigned int texture, texture2;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // bind texture
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load in image data
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-a
+    unsigned char* data = stbi_load("C:/hLib/glProject/LearnOpenGL/container.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); // generate texture1 using loaded image data
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data); // good practice to free the image memory
+
+    // Texture 2
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    unsigned char* data2 = stbi_load("C:/hLib/glProject/LearnOpenGL/awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data2) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2); // generate texture2 using loaded image data
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data2);
+
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    // glUniform1i(glGetUniformLocation(ourShader.ID, "Texture"), 0); // texture unit 0
+    // or set it via the texture class
+    ourShader.use(); // don't forget to activate/use the shader before setting uniforms!
+    ourShader.setInt("ourTexture1", 0); // texture unit 0
+    ourShader.setInt("ourTexture2", 1); // texture unit 1
 
     // Render loop, that keeps on running until we tell GLFW to stop.
     /*The glfwSwapBuffers will swap the color buffer
@@ -90,17 +164,27 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Specify color to clear screen with
         glClear(GL_COLOR_BUFFER_BIT); // clear the color buffer
 
+        // bind textures on corresponding texture units
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        // Now render the triangles
         ourShader.use();
-        ourShader.setFloat("posUniform", 0.5f);
-        // Now render the triangle
-        glBindVertexArray(VAOs[0]);
-        glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the triangle
-        /*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/ // WIREFRAME, COMMENT FOR FILL
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the triangle
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // WIREFRAME, COMMENT FOR FILL
 
         // check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents(); // Check if any events are triggered such as key input or mouse movement, etc.s
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
     // Delete all of GLFW's resources that were allocated and terminate
     glfwTerminate();

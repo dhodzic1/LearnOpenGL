@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <C:\glfw-3.3.8\include\GLFW\glfw3.h>
 #include <iostream>
-#include <C:\hLib\Include/shader_s.h>
+#include <C:\hLib\glProject\LearnOpenGL\project\shader_s.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <glm/glm.hpp>

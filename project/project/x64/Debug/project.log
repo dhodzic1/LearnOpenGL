@@ -1,4 +1,3 @@
 ﻿  ogl.cpp
-C:\hLib\glProject\LearnOpenGL\project\ogl.cpp(226,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\hLib\glProject\LearnOpenGL\project\ogl.cpp(227,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\hLib\glProject\LearnOpenGL\project\ogl.cpp(217,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   project.vcxproj -> C:\hLib\glProject\LearnOpenGL\project\x64\Debug\project.exe

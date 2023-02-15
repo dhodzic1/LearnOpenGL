@@ -141,6 +141,7 @@
     <ClInclude Include="..\..\..\..\Include\glm\glm.hpp" />
     <ClInclude Include="..\..\..\..\Include\glm\gtc\matrix_transform.hpp" />
     <ClInclude Include="..\..\..\..\Include\glm\gtc\type_ptr.hpp" />
+    <ClInclude Include="..\camera.h" />
     <ClInclude Include="..\shader_s.h" />
   </ItemGroup>
   <ItemGroup>

@@ -6,15 +6,29 @@
 #include <stb_image.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <C:\hLib\glProject\LearnOpenGL\project\camera.h>
 
 // prototypes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// time
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
+
 
 int main()
 { 
@@ -50,6 +64,11 @@ int main()
     /*When the window is first displayed framebuffer_size_callback gets called as well with the resulting window dimensions.
     For retina displays width and height will end up significantly higher than the original input values.*/
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Load in shaders (linking, attaching, and program creation in shader_s.h Shader class file
     Shader ourShader("C:/hLib/glProject/LearnOpenGL/project/shader.vs", "C:/hLib/glProject/LearnOpenGL/project/shader.fs");
@@ -194,7 +213,10 @@ int main()
     that is used to render to during this render iteration and show it as output to the screen.*/
     while (!glfwWindowShouldClose(window))
     {   
-
+        // calculate delta time
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
         // input
         processInput(window);
 
@@ -211,21 +233,11 @@ int main()
         ourShader.use();
 
         // create transformations
-        glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(50.0f), (float)SCR_WIDTH/ (float)SCR_HEIGHT, 0.1f, 100.0f);
-        // retrieve the matrix uniform locations
-        unsigned int modelLocation = glGetUniformLocation(ourShader.ID, "model");
-        unsigned int viewLocation = glGetUniformLocation(ourShader.ID, "view");
-        unsigned int projLocation = glGetUniformLocation(ourShader.ID, "projection");
-        // pass them to the shaders
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH/ (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", 1, false, projection);
 
         // camera/view transformation
-        glm::mat4 view = glm::mat4(1.0f); 
-        float radius = 10.0f;
-        float camX = (sin(glfwGetTime()) * radius);
-        float camZ = (cos(glfwGetTime()) * radius);
-        view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 view = camera.GetViewMatrix();
         ourShader.setMat4("view", 1, false, view);
 
         // Now render the triangles
@@ -272,4 +284,54 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+       
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    xoffset = xpos - lastX;
+    yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }

@@ -237,7 +237,8 @@ int main()
             else {
                 model = glm::rotate(model, (float)-glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
             }
-            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+            ourShader.setMat4("model", 1, false, model);
+            //glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model)); // same thing just implemented class function to make it easier to call
             // draw cubes
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }

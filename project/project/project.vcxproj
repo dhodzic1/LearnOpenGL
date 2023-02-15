@@ -138,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\Users\daria\Downloads\stb_image.h" />
+    <ClInclude Include="..\..\..\..\Include\glm\glm.hpp" />
+    <ClInclude Include="..\..\..\..\Include\glm\gtc\matrix_transform.hpp" />
+    <ClInclude Include="..\..\..\..\Include\glm\gtc\type_ptr.hpp" />
     <ClInclude Include="..\..\..\..\Include\shader_s.h" />
   </ItemGroup>
   <ItemGroup>

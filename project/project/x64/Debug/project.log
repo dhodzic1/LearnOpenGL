@@ -1,12 +1,2 @@
 ﻿  ogl.cpp
-C:\hLib\glProject\LearnOpenGL\project\ogl.cpp(178,27): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\hLib\glProject\LearnOpenGL\project\ogl.cpp(179,48): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
   project.vcxproj -> C:\hLib\glProject\LearnOpenGL\project\x64\Debug\project.exe

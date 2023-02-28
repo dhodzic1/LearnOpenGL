@@ -54,5 +54,11 @@
     <None Include="..\shader.vs">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\light_cube.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\light_cube.vs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

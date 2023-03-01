@@ -1,2 +1,4 @@
 ﻿  ogl.cpp
+C:\hLib\glProject\LearnOpenGL\project\ogl.cpp(209,52): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+glad.obj : warning LNK4099: PDB 'vc142.pdb' was not found with 'glad.obj' or at 'C:\hLib\glProject\LearnOpenGL\project\x64\Debug\vc142.pdb'; linking object as if no debug info
   project.vcxproj -> C:\hLib\glProject\LearnOpenGL\project\x64\Debug\project.exe

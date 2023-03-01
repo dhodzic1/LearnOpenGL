@@ -161,14 +161,16 @@ int main()
     // (void*)0 is starting point, 3* sizeof(float) is 3 * 4 which is 12 as the offset from the beginning of vertex attribute array
     // 6 * sizeof (float) is 6 * 4 which is 24 as the offset from beginning of vertex attribute array
     
-    unsigned int diffuseMap = loadTexture("C:/hLib/glProject/LearnOpenGL/container2.png");
+    unsigned int diffuseMap = loadTexture("C:/hLib/glProject/LearnOpenGL/borg.jpg");
     unsigned int specularMap = loadTexture("C:/hLib/glProject/LearnOpenGL/container2_specular.png");
+    unsigned int emissionMap = loadTexture("C:/hLib/glProject/LearnOpenGL/lights.png");
 
     // shader configuration
     // --------------------
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
+    lightingShader.setInt("material.emission", 2);
 
     // render loop
     // -----------
@@ -194,23 +196,17 @@ int main()
         lightingShader.setVec3("light.position", lightPos);   // globally defined at top of file (lightPos)
         lightingShader.setVec3("viewPos", camera.Position);
 
-        //glm::vec3 lightColor;
-        //lightColor.x = static_cast<float>(sin(glfwGetTime() * 2.0));
-        //lightColor.y = static_cast<float>(sin(glfwGetTime() * 0.7));
-        //lightColor.z = static_cast<float>(sin(glfwGetTime() * 1.3));
-        //glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // decrease the influence
-        //glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
-
         // lighting properties
         lightingShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
         lightingShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
         // material properties
-        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-        lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
         lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         lightingShader.setFloat("material.shininess", 32.0f);
+
+        // time 
+        lightingShader.setFloat("time", glfwGetTime());
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -229,6 +225,10 @@ int main()
         // bind specular map
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
+
+        // bind emission map
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, emissionMap);
 
         // render the cube
         glBindVertexArray(cubeVAO);
